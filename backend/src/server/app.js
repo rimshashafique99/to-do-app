@@ -4,7 +4,7 @@ import todoRoutes from "../routes/todo.routes.js";
 
 const app = express();
 
-// Middlewares
+// Middleware
 app.use(express.json());
 app.use(cors());
 
