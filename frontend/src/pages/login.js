@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -14,7 +15,7 @@ export default function Login() {
     setSuccess("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password } = formData;
 
@@ -29,13 +30,22 @@ export default function Login() {
       return;
     }
 
-    // Simulate login API
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      setLoading(true);
+      // API call to backend
+      const res = await axios.post("http://localhost:5000/api/login", { email, password });
+      localStorage.setItem("token", res.data.token); // save JWT token
       setSuccess("Login successful!");
       setFormData({ email: "", password: "" });
-    }, 1500);
+
+      setTimeout(() => {
+        navigate("/todo");
+      }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,9 +98,9 @@ export default function Login() {
 
         <p className="text-sm text-gray-600 text-center mt-4">
           Don’t have an account?{" "}
-           <Link to="/register" className="text-blue-600 hover:underline">
-                     Register
-                    </Link>
+          <Link to="/register" className="text-blue-600 hover:underline">
+            Register
+          </Link>
         </p>
       </div>
     </div>

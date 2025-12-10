@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // added useNavigate
 import { ReactTyped } from "react-typed";
+import axios from "axios"; // import axios for API calls
 
 export default function Register() {
+  const navigate = useNavigate(); // navigate after success
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -19,7 +21,7 @@ export default function Register() {
     setSuccess("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { email, password, confirmPassword } = formData;
 
@@ -44,17 +46,26 @@ export default function Register() {
       return;
     }
 
-    // Simulate loading
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      setLoading(true);
+      // API call to backend
+      await axios.post("http://localhost:5000/api/register", { email, password });
       setSuccess("Account created successfully!");
       setFormData({ email: "", password: "", confirmPassword: "" });
-    }, 1500);
+
+      // redirect to login after 1.5s
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
-return (
-  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center bg-gray-100 px-4 relative">
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center bg-gray-100 px-4 relative">
       <div className="absolute top-10 text-center text-3xl font-bold text-gray-800">
         <ReactTyped
           strings={[

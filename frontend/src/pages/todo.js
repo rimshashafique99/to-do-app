@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getTodos, createTodo, updateTodo, deleteTodo } from "../api/todoapi";
 
 export default function Todo() {
   const [tasks, setTasks] = useState([]);
@@ -7,51 +8,80 @@ export default function Todo() {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editText, setEditText] = useState("");
   const navigate = useNavigate();
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (!token) navigate("/login");
+    else fetchTasks();
+  }, []);
+
+  const fetchTasks = async () => {
+    try {
+      const res = await getTodos(token);
+      setTasks(res.data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fetch tasks. Please login again.");
+      navigate("/login");
+    }
+  };
+
   const handleLogout = () => {
-    // Clear token or user state if you have one
+    localStorage.removeItem("token");
     alert("Logged out successfully!");
     navigate("/login");
   };
-  const addTask = () => {
+
+  const handleAddTask = async () => {
     if (!input.trim()) return;
-
-    const newTask = {
-      id: Date.now(),
-      text: input.trim(),
-      completed: false,
-    };
-
-    setTasks([newTask, ...tasks]);
-    setInput("");
+    try {
+      await createTodo({ title: input.trim() }, token);
+      setInput("");
+      fetchTasks();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add task.");
+    }
   };
 
-  const deleteTask = (id) => {
-    setTasks(tasks.filter((task) => task.id !== id));
+  const handleDeleteTask = async (id) => {
+    try {
+      await deleteTodo(id, token);
+      fetchTasks();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete task.");
+    }
   };
 
-  const startEditing = (id, text) => {
+  const handleStartEditing = (id, text) => {
     setEditingTaskId(id);
     setEditText(text);
   };
 
-  const saveEdit = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, text: editText.trim() } : task
-      )
-    );
-    setEditingTaskId(null);
-    setEditText("");
+  const handleSaveEdit = async (id) => {
+    if (!editText.trim()) return;
+    try {
+      await updateTodo(id, { title: editText.trim() }, token);
+      setEditingTaskId(null);
+      setEditText("");
+      fetchTasks();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update task.");
+    }
   };
 
-  const toggleComplete = (id) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const handleToggleComplete = async (task) => {
+    try {
+      await updateTodo(task._id, { completed: !task.completed }, token);
+      fetchTasks();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update task status.");
+    }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center bg-gray-100 px-4 relative">
       {/* Logout Button */}
@@ -63,6 +93,7 @@ export default function Todo() {
           Logout
         </button>
       </div>
+
       <div className="max-w-lg w-full bg-white shadow-xl rounded-2xl p-6">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           📝 My To-Do List
@@ -92,18 +123,18 @@ export default function Todo() {
           <ul className="space-y-3">
             {tasks.map((task) => (
               <li
-                key={task.id}
+                key={task._id}
                 className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-3 hover:shadow-md transition"
               >
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => toggleComplete(task.id)}
+                    onChange={() => toggleComplete(task)}
                     className="w-4 h-4 accent-blue-600"
                   />
 
-                  {editingTaskId === task.id ? (
+                  {editingTaskId === task._id ? (
                     <input
                       type="text"
                       value={editText}
@@ -118,22 +149,22 @@ export default function Todo() {
                           : "text-gray-800"
                       }`}
                     >
-                      {task.text}
+                      {task.title}
                     </span>
                   )}
                 </div>
 
                 <div className="flex gap-2">
-                  {editingTaskId === task.id ? (
+                  {editingTaskId === task._id ? (
                     <button
-                      onClick={() => saveEdit(task.id)}
+                      onClick={() => saveEdit(task._id)}
                       className="text-green-600 text-sm hover:underline"
                     >
                       Save
                     </button>
                   ) : (
                     <button
-                      onClick={() => startEditing(task.id, task.text)}
+                      onClick={() => startEditing(task._id, task.title)}
                       className="text-blue-600 text-sm hover:underline"
                     >
                       Edit
@@ -141,7 +172,7 @@ export default function Todo() {
                   )}
 
                   <button
-                    onClick={() => deleteTask(task.id)}
+                    onClick={() => deleteTask(task._id)}
                     className="text-red-600 text-sm hover:underline"
                   >
                     Delete
