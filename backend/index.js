@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
-app.use("/api/todos", todoRoutes);
+app.use("/api/todoapi", todoRoutes);
 
 // -----------------------------
 // Connect to MongoDB
