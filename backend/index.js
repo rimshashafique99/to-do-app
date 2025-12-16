@@ -4,7 +4,8 @@ dotenv.config();
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import todoRoutes from "./routes/todo.routes.js"; // adjust path if needed
+import todoRoutes from "./routes/todo.routes.js";
+import { notFound, errorHandler } from "./middleware/error.middleware.js";
 
 // -----------------------------
 // Create Express App
@@ -13,10 +14,14 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "http://localhost:5173" }));
 
 // Routes
 app.use("/api/todoapi", todoRoutes);
+
+// Error Handling Middleware (after routes)
+app.use(notFound);
+app.use(errorHandler);
 
 // -----------------------------
 // Connect to MongoDB
