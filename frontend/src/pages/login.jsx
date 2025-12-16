@@ -19,7 +19,6 @@ export default function Login() {
     e.preventDefault();
     const { email, password } = formData;
 
-    // Basic validation
     if (!email || !password) {
       setError("Both fields are required");
       return;
@@ -32,15 +31,15 @@ export default function Login() {
 
     try {
       setLoading(true);
-      // API call to backend
       const res = await axios.post("http://localhost:5000/api/login", { email, password });
-      localStorage.setItem("token", res.data.token); // save JWT token
+      
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify({ name: res.data.name, email: res.data.email }));
+
       setSuccess("Login successful!");
       setFormData({ email: "", password: "" });
 
-      setTimeout(() => {
-        navigate("/todo");
-      }, 1000);
+      setTimeout(() => navigate("/todo"), 1000);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     } finally {
@@ -49,11 +48,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          Welcome Back
-        </h2>
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Welcome Back</h2>
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         {success && <p className="text-green-600 text-sm mb-3">{success}</p>}
@@ -87,9 +84,7 @@ export default function Login() {
             type="submit"
             disabled={loading}
             className={`w-full py-2 text-white rounded-lg transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? "Logging in..." : "Login"}

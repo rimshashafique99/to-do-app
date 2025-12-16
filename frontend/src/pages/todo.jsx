@@ -29,7 +29,7 @@ export default function Todo() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    alert("Logged out successfully!");
+    localStorage.removeItem("user");
     navigate("/login");
   };
 
@@ -82,8 +82,9 @@ export default function Todo() {
       alert("Failed to update task status.");
     }
   };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center bg-gray-100 px-4 relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 relative">
       {/* Logout Button */}
       <div className="absolute top-4 right-6">
         <button
@@ -109,7 +110,7 @@ export default function Todo() {
             className="flex-1 border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
-            onClick={addTask}
+            onClick={handleAddTask}
             className="bg-blue-600 text-white px-4 rounded-lg hover:bg-blue-700 transition"
           >
             Add
@@ -118,7 +119,7 @@ export default function Todo() {
 
         {/* Task List */}
         {tasks.length === 0 ? (
-          <p className="text-center text-gray-500">No tasks yet. Add one! </p>
+          <p className="text-center text-gray-500">No tasks yet. Add one!</p>
         ) : (
           <ul className="space-y-3">
             {tasks.map((task) => (
@@ -130,7 +131,7 @@ export default function Todo() {
                   <input
                     type="checkbox"
                     checked={task.completed}
-                    onChange={() => toggleComplete(task)}
+                    onChange={() => handleToggleComplete(task)}
                     className="w-4 h-4 accent-blue-600"
                   />
 
@@ -143,11 +144,7 @@ export default function Todo() {
                     />
                   ) : (
                     <span
-                      className={`${
-                        task.completed
-                          ? "line-through text-gray-400"
-                          : "text-gray-800"
-                      }`}
+                      className={`${task.completed ? "line-through text-gray-400" : "text-gray-800"}`}
                     >
                       {task.title}
                     </span>
@@ -157,14 +154,14 @@ export default function Todo() {
                 <div className="flex gap-2">
                   {editingTaskId === task._id ? (
                     <button
-                      onClick={() => saveEdit(task._id)}
+                      onClick={() => handleSaveEdit(task._id)}
                       className="text-green-600 text-sm hover:underline"
                     >
                       Save
                     </button>
                   ) : (
                     <button
-                      onClick={() => startEditing(task._id, task.title)}
+                      onClick={() => handleStartEditing(task._id, task.title)}
                       className="text-blue-600 text-sm hover:underline"
                     >
                       Edit
@@ -172,7 +169,7 @@ export default function Todo() {
                   )}
 
                   <button
-                    onClick={() => deleteTask(task._id)}
+                    onClick={() => handleDeleteTask(task._id)}
                     className="text-red-600 text-sm hover:underline"
                   >
                     Delete

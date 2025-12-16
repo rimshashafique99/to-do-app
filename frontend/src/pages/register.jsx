@@ -1,16 +1,11 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // added useNavigate
-import { ReactTyped } from "react-typed";
-import axios from "axios"; // import axios for API calls
+import { Link, useNavigate } from "react-router-dom";
+import ReactTyped from "react-typed";
+import axios from "axios";
 
 export default function Register() {
-  const navigate = useNavigate(); // navigate after success
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: "", password: "", confirmPassword: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +20,6 @@ export default function Register() {
     e.preventDefault();
     const { email, password, confirmPassword } = formData;
 
-    // Basic validation
     if (!email || !password || !confirmPassword) {
       setError("All fields are required");
       return;
@@ -48,15 +42,11 @@ export default function Register() {
 
     try {
       setLoading(true);
-      // API call to backend
       await axios.post("http://localhost:5000/api/register", { email, password });
       setSuccess("Account created successfully!");
       setFormData({ email: "", password: "", confirmPassword: "" });
 
-      // redirect to login after 1.5s
-      setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
     } finally {
@@ -65,23 +55,18 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center bg-gray-100 px-4 relative">
-      <div className="absolute top-10 text-center text-3xl font-bold text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 relative">
+      <div className="absolute top-10 text-center text-3xl font-bold text-gray-800 w-full">
         <ReactTyped
-          strings={[
-            "Welcome to the To-Do App",
-            "Organize your day",
-            "Stay productive",
-          ]}
+          strings={["Welcome to the To-Do App", "Organize your day", "Stay productive"]}
           typeSpeed={70}
           backSpeed={40}
           loop
         />
       </div>
-      <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-8">
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-          Create an Account
-        </h2>
+
+      <div className="max-w-md w-full bg-white shadow-lg rounded-2xl p-8 mt-28">
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">Create an Account</h2>
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
         {success && <p className="text-green-600 text-sm mb-3">{success}</p>}
@@ -112,9 +97,7 @@ export default function Register() {
           </div>
 
           <div>
-            <label className="block text-sm text-gray-700 mb-1">
-              Confirm Password
-            </label>
+            <label className="block text-sm text-gray-700 mb-1">Confirm Password</label>
             <input
               type="password"
               name="confirmPassword"
@@ -129,9 +112,7 @@ export default function Register() {
             type="submit"
             disabled={loading}
             className={`w-full py-2 text-white rounded-lg transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700"
+              loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
             {loading ? "Registering..." : "Register"}
@@ -139,7 +120,7 @@ export default function Register() {
         </form>
 
         <p className="text-sm text-gray-600 text-center mt-4">
-          Don’t have an account?{" "}
+          Already have an account?{" "}
           <Link to="/login" className="text-blue-600 hover:underline">
             Login
           </Link>
